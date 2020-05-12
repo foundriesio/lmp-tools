@@ -34,16 +34,9 @@ local_branch=$(git rev-parse --abbrev-ref HEAD)
 # look for a remote tracking branch
 remote_branch=$(git config --get branch.${local_branch}.merge || true)
 if [ -z "${remote_branch}" ]; then
-    # if local_branch is "default" and pwd is a repo checkout:
-    # the remote branch can default to master, otherwise abort
-    local_dir=$(pwd)
-    if [ "${local_branch}" = "default" ] && [ -z "${local_dir##*".repo/manifests"*}" ]; then
-        remote_branch="refs/heads/master"
-    else
-        echo "fatal: The current branch has no upstream branch."
-        echo "To set the upstream tracking branch, use: git branch -u <remote>/<branch>"
-        exit 1
-    fi
+    echo "fatal: The current branch has no upstream branch."
+    echo "To set the upstream tracking branch, use: git branch -u <remote>/<branch>"
+    exit 1
 fi
 
 # fetch tags from upstream
