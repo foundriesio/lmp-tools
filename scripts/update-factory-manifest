@@ -45,7 +45,7 @@ git fetch --tags --quiet ${foundries_manifest}
 # if no tag parameter was supplied use latest upstream tag
 if [ -z "${latest}" ]; then
     # assign last upstream tag to latest
-    latest=$(git describe --tags --abbrev=0)
+    latest=$(git describe --tags --abbrev=0 FETCH_HEAD)
 fi
 
 # check to see if last upstream tag is already included in HEAD (if so exit)
