@@ -26,6 +26,7 @@ DISPLAY_USAGE=0
 SIGN_SPL=0
 SIGN_M4APP=0
 SRK_INDEX=1
+ENGINE=
 
 parse_args()
 {
@@ -67,6 +68,10 @@ parse_args()
             SRK_INDEX=${2}
             shift
             ;;
+        --engine)
+            ENGINE=${2}
+            shift
+            ;;
         -h)
             DISPLAY_USAGE=1
             shift
@@ -93,6 +98,7 @@ if [ "${DISPLAY_USAGE}" = "1" ]; then
     echo "  --key-dir: location for key files     [default: ${KEY_DIR}]"
     echo "  --fix-sdp-dcd: turn on clear / restore DCD addr for SPD SPL binary"
     echo "  --srk-index: the key to sign with     [default: 1]"
+    echo "  --engine: the the engine to use       [default: CAAM]"
     exit 0
 fi
 
@@ -123,6 +129,10 @@ echo "KEYS INDEX    : ${SRK_INDEX}"
 if [ "${SIGN_SPL}" = "1" ]; then
     echo "FIX-SDP-DCD   : ${FIX_SDP_DCD}"
 fi
+if [ -n "${ENGINE}" ]
+then
+    echo "ENGINE        : ${ENGINE}"
+fi
 echo ""
 
 # Transform template -> config
@@ -136,6 +146,16 @@ CSF=$(ls -t $KEY_DIR/CSF${SRK_INDEX}*_crt.pem 2> /dev/null | head -1)
 if [ -n "${CSF}" ]
 then
     sed -i "s^${KEY_DIR}/CSF_1_crt.pem^${CSF}^" ${CSF_TEMPLATE}.csf-config
+fi
+
+if [ "${SRK_INDEX}" != "1" ]
+then
+    sed -i "s/^Source index =.*/Source index = $((${SRK_INDEX} - 1))/" ${CSF_TEMPLATE}.csf-config
+fi
+
+if [ -n "${ENGINE}" ]
+then
+    sed -i "s/^Engine =.*/Engine = ${ENGINE}/g" ${CSF_TEMPLATE}.csf-config
 fi
 
 # working file used for signature
