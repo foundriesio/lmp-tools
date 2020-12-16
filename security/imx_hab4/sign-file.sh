@@ -127,12 +127,12 @@ echo ""
 
 # Transform template -> config
 sed "s^@@KEY_ROOT@@^${KEY_DIR}^g" ${CSF_TEMPLATE} > ${CSF_TEMPLATE}.csf-config
-IMG=$(ls ${KEY_DIR}/IMG${SRK_INDEX}*_crt.pem 2> /dev/null)
+IMG=$(ls -t ${KEY_DIR}/IMG${SRK_INDEX}*_crt.pem 2> /dev/null | head -1)
 if [ -n "${IMG}" ]
 then
     sed -i "s^${KEY_DIR}/IMG_1_crt.pem^${IMG}^" ${CSF_TEMPLATE}.csf-config
 fi
-CSF=$(ls $KEY_DIR/CSF${SRK_INDEX}*_crt.pem 2> /dev/null)
+CSF=$(ls -t $KEY_DIR/CSF${SRK_INDEX}*_crt.pem 2> /dev/null | head -1)
 if [ -n "${CSF}" ]
 then
     sed -i "s^${KEY_DIR}/CSF_1_crt.pem^${CSF}^" ${CSF_TEMPLATE}.csf-config
