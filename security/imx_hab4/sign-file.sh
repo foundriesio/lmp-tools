@@ -25,6 +25,7 @@ DCD_CLEAR=0
 DISPLAY_USAGE=0
 SIGN_SPL=0
 SIGN_M4APP=0
+SRK_INDEX=1
 
 parse_args()
 {
@@ -62,6 +63,10 @@ parse_args()
             DCD_CLEAR=1
             shift
             ;;
+        --srk-index)
+            SRK_INDEX=${2}
+            shift
+            ;;
         -h)
             DISPLAY_USAGE=1
             shift
@@ -87,6 +92,7 @@ if [ "${DISPLAY_USAGE}" = "1" ]; then
     echo "  --m4app: M4 binary to sign            [--spl or --m4app is required]"
     echo "  --key-dir: location for key files     [default: ${KEY_DIR}]"
     echo "  --fix-sdp-dcd: turn on clear / restore DCD addr for SPD SPL binary"
+    echo "  --srk-index: the key to sign with     [default: 1]"
     exit 0
 fi
 
@@ -113,13 +119,24 @@ echo "CST BINARY    : ${CST_BINARY}"
 echo "CSF TEMPLATE  : ${CSF_TEMPLATE}"
 echo "BINARY FILE   : ${WORK_FILE}"
 echo "KEYS DIRECTORY: ${KEY_DIR}"
+echo "KEYS INDEX    : ${SRK_INDEX}"
 if [ "${SIGN_SPL}" = "1" ]; then
     echo "FIX-SDP-DCD   : ${FIX_SDP_DCD}"
 fi
 echo ""
 
 # Transform template -> config
-sed "s/@@KEY_ROOT@@/${KEY_DIR}/g" ${CSF_TEMPLATE} > ${CSF_TEMPLATE}.csf-config
+sed "s^@@KEY_ROOT@@^${KEY_DIR}^g" ${CSF_TEMPLATE} > ${CSF_TEMPLATE}.csf-config
+IMG=$(ls ${KEY_DIR}/IMG${SRK_INDEX}*_crt.pem 2> /dev/null)
+if [ -n "${IMG}" ]
+then
+    sed -i "s^${KEY_DIR}/IMG_1_crt.pem^${IMG}^" ${CSF_TEMPLATE}.csf-config
+fi
+CSF=$(ls $KEY_DIR/CSF${SRK_INDEX}*_crt.pem 2> /dev/null)
+if [ -n "${CSF}" ]
+then
+    sed -i "s^${KEY_DIR}/CSF_1_crt.pem^${CSF}^" ${CSF_TEMPLATE}.csf-config
+fi
 
 # working file used for signature
 cp ${WORK_FILE} ${WORK_FILE}.mod
