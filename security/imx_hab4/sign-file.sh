@@ -140,22 +140,22 @@ sed "s^@@KEY_ROOT@@^${KEY_DIR}^g" ${CSF_TEMPLATE} > ${CSF_TEMPLATE}.csf-config
 IMG=$(ls -t ${KEY_DIR}/IMG${SRK_INDEX}*_crt.pem 2> /dev/null | head -1)
 if [ -n "${IMG}" ]
 then
-    sed -i "s^${KEY_DIR}/IMG_1_crt.pem^${IMG}^" ${CSF_TEMPLATE}.csf-config
+    sed -i~ "s^${KEY_DIR}/IMG_1_crt.pem^${IMG}^" ${CSF_TEMPLATE}.csf-config
 fi
 CSF=$(ls -t $KEY_DIR/CSF${SRK_INDEX}*_crt.pem 2> /dev/null | head -1)
 if [ -n "${CSF}" ]
 then
-    sed -i "s^${KEY_DIR}/CSF_1_crt.pem^${CSF}^" ${CSF_TEMPLATE}.csf-config
+    sed -i~ "s^${KEY_DIR}/CSF_1_crt.pem^${CSF}^" ${CSF_TEMPLATE}.csf-config
 fi
 
 if [ "${SRK_INDEX}" != "1" ]
 then
-    sed -i "s/^Source index =.*/Source index = $((${SRK_INDEX} - 1))/" ${CSF_TEMPLATE}.csf-config
+    sed -i~ "s/^Source index =.*/Source index = $((${SRK_INDEX} - 1))/" ${CSF_TEMPLATE}.csf-config
 fi
 
 if [ -n "${ENGINE}" ]
 then
-    sed -i "s/^Engine =.*/Engine = ${ENGINE}/g" ${CSF_TEMPLATE}.csf-config
+    sed -i~ "s/^Engine =.*/Engine = ${ENGINE}/g" ${CSF_TEMPLATE}.csf-config
 fi
 
 # working file used for signature
@@ -163,7 +163,7 @@ cp ${WORK_FILE} ${WORK_FILE}.mod
 
 # for M4 application: pad binary to 0x1000 alignment
 if [ "${SIGN_M4APP}" = "1" ]; then
-    BINARY_LEN=$(od -An -t x4 -j 0x1024 -N 0x4 ${WORK_FILE}.mod | cut -d' ' -f2)
+    BINARY_LEN=$(od -An -t x4 -j 0x1024 -N 4 ${WORK_FILE}.mod | awk '{print $1}')
     BINARY_LEN=$(printf "%08x" $(((0x${BINARY_LEN} / 0x1000 + 1) * 0x1000)))
     objcopy -I binary -O binary --pad-to 0x${BINARY_LEN} --gap-fill=0x5A ${WORK_FILE}.mod ${WORK_FILE}.mod
 fi
@@ -171,14 +171,14 @@ fi
 # DCD address must be cleared for signature, as SDP will clear it.
 if [ "${DCD_CLEAR}" = "1" ]; then
     # generate a NULL address for the DCD
-    dd if=/dev/zero of=zero.bin bs=1 count=4
+    dd if=/dev/zero of=zero.bin bs=1 count=4 2>/dev/null
     # replace the DCD address with the NULL address
-    dd if=zero.bin of=${WORK_FILE}.mod seek=12 bs=1 conv=notrunc
+    dd if=zero.bin of=${WORK_FILE}.mod seek=12 bs=1 conv=notrunc 2>/dev/null
     rm zero.bin
 
     # get DCD block info using od, tr and awk
-    DCD_START=$(od -An -t x4 -j 0x20 -N 0x4 ${WORK_FILE}.mod | cut -d' ' -f2)
-    DCD_HEX=$(od -An -t x4 -j 0x2c -N 0x4 --endian=big ${WORK_FILE} | tr -d ' ' | awk '{print substr($0,3,4)}')
+    DCD_START=$(od -An -t x4 -j 0x20 -N 4 ${WORK_FILE}.mod | awk '{print $1}')
+    DCD_HEX=$(od -An -t x4 -j 0x2c -N 4 ${WORK_FILE} | awk '{print substr($1,5,2) substr($1,3,2)}')
     DCD_LEN=$(printf "0x%08x" 0x${DCD_HEX})
     # hard-code DCD location to bottom of RAM w/ offset of 2c
     DCD_BLOCKS="0x${DCD_START} 0x0000002c ${DCD_LEN}"
@@ -193,13 +193,13 @@ fi
 
 # get HAB block info using od
 if [ "${SIGN_M4APP}" = "1" ]; then
-	HAB_IVT_SELF=$(od -An -t x4 -j 0x1014 -N 0x4 ${WORK_FILE}.mod | cut -d' ' -f2)
+	HAB_IVT_SELF=$(od -An -t x4 -j 0x1014 -N 4 ${WORK_FILE}.mod | awk '{print $1}')
 else
-	HAB_IVT_SELF=$(od -An -t x4 -j 0x14 -N 0x4 ${WORK_FILE}.mod | cut -d' ' -f2)
+	HAB_IVT_SELF=$(od -An -t x4 -j 0x14 -N 4 ${WORK_FILE}.mod | awk '{print $1}')
 fi
 
 # get HAB length using stat
-HAB_LEN=$(printf "0x%08x" `stat -c "%s" ${WORK_FILE}.mod`)
+HAB_LEN=$(printf "0x%08x" `wc -c < ${WORK_FILE}.mod`)
 
 # insert CSF offset into m4app binary (as it isn't set by default)
 # adjust boot data size to include CSF
@@ -215,7 +215,7 @@ if [ "${SIGN_M4APP}" = "1" ]; then
     HAB_CSF_OFFSET_OCT_4=$(printf "%o" $(echo "$HAB_CSF_OFFSET" | awk '{print "0x"substr($0,1,2)}'))
     printf "\\${HAB_CSF_OFFSET_OCT_1}\\${HAB_CSF_OFFSET_OCT_2}\\${HAB_CSF_OFFSET_OCT_3}\\${HAB_CSF_OFFSET_OCT_4}" > ${WORK_FILE}.csf_offset
     # write the CSF_OFFSET to binary @ 0x1018
-    dd if=${WORK_FILE}.csf_offset of=${WORK_FILE}.mod seek=4120 bs=1 conv=notrunc
+    dd if=${WORK_FILE}.csf_offset of=${WORK_FILE}.mod seek=4120 bs=1 conv=notrunc 2>/dev/null
     rm ${WORK_FILE}.csf_offset
 
     # increase boot data size to include csf
@@ -227,7 +227,7 @@ if [ "${SIGN_M4APP}" = "1" ]; then
     BOOT_DATA_SIZE_OCT_4=$(printf "%o" $(echo "$BOOT_DATA_SIZE" | awk '{print "0x"substr($0,1,2)}'))
     printf "\\${BOOT_DATA_SIZE_OCT_1}\\${BOOT_DATA_SIZE_OCT_2}\\${BOOT_DATA_SIZE_OCT_3}\\${BOOT_DATA_SIZE_OCT_4}" > ${WORK_FILE}.boot_data
     # write the modified boot_data size to binary @ 0x1024
-    dd if=${WORK_FILE}.boot_data of=${WORK_FILE}.mod seek=4132 bs=1 conv=notrunc
+    dd if=${WORK_FILE}.boot_data of=${WORK_FILE}.mod seek=4132 bs=1 conv=notrunc 2>/dev/null
     rm ${WORK_FILE}.boot_data
 fi
 
@@ -259,5 +259,6 @@ fi
 
 # Cleanup config / mod SPL
 rm ${CSF_TEMPLATE}.csf-config
+rm ${CSF_TEMPLATE}.csf-config~
 rm ${WORK_FILE}_csf.bin
 rm ${WORK_FILE}.mod
