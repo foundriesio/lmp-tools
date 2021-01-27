@@ -156,6 +156,12 @@ fi
 if [ -n "${ENGINE}" ]
 then
     sed -i~ "s/^Engine =.*/Engine = ${ENGINE}/g" ${CSF_TEMPLATE}.csf-config
+    if [ "${ENGINE}" = "SW" ]
+    then
+        # Remove the unlock block, it is not needed for SW engine
+        awk '/^\[Unlock\]/, /^Feature/{next}{print $0}' ${CSF_TEMPLATE}.csf-config > ${CSF_TEMPLATE}.csf-config~
+        mv ${CSF_TEMPLATE}.csf-config~ ${CSF_TEMPLATE}.csf-config
+    fi
 fi
 
 # working file used for signature
@@ -259,6 +265,6 @@ fi
 
 # Cleanup config / mod SPL
 rm ${CSF_TEMPLATE}.csf-config
-rm ${CSF_TEMPLATE}.csf-config~
+rm -f ${CSF_TEMPLATE}.csf-config~
 rm ${WORK_FILE}_csf.bin
 rm ${WORK_FILE}.mod
