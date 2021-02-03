@@ -81,7 +81,8 @@ parse_args()
             shift
             ;;
         *)
-            shift
+            echo "Unknown param: '${1}'!"
+            exit 1
             ;;
         esac
     done
