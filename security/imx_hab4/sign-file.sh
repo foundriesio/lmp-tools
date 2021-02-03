@@ -67,9 +67,11 @@ parse_args()
         --srk-index)
             SRK_INDEX=${2}
             shift
+            shift
             ;;
         --engine)
             ENGINE=${2}
+            shift
             shift
             ;;
         -h)
