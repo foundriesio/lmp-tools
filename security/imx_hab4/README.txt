@@ -134,13 +134,13 @@ HAB Blocks:   0x2f010400 0x00000000 0x00021c00
 DCD Blocks:   0x00910000 0x0000002c 0x00000258
 
 Notice that the DCD address is hardcoded to a wrong address on some
-u-boot versions; we sent a fix to the mainters to correct it since on
+u-boot versions; we sent a fix to the maintainers to correct it since on
 the imx7ulp this address should be 0x2f010000.
 
 This information will be used to generate the Command Sequence File
 (CSF) used to sign the image.
 
-The Command Sequence File will need access to the SRK table amd PEM files.
+The Command Sequence File will need access to the SRK table and PEM files.
 You can get them as before from the lmp-manifest repo.
 
 SPLMfg.csf
