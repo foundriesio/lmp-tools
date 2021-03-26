@@ -27,6 +27,7 @@ SIGN_SPL=0
 SIGN_M4APP=0
 SRK_INDEX=1
 ENGINE=
+OUT=/dev/null
 
 parse_args()
 {
@@ -82,6 +83,10 @@ parse_args()
             DISPLAY_USAGE=1
             shift
             ;;
+        --verbose)
+            OUT=$(tty)
+            shift
+            ;;
         *)
             echo "Unknown param: '${1}'!"
             exit 1
@@ -102,6 +107,7 @@ if [ "${DISPLAY_USAGE}" = "1" ]; then
     echo "  --fix-sdp-dcd: turn on clear / restore DCD addr for SPD SPL binary"
     echo "  --srk-index: the key to sign with     [default: 1]"
     echo "  --engine: the the engine to use       [default: CAAM]"
+    echo "  --verbose: display output of cst tool"
     exit 0
 fi
 
@@ -257,7 +263,7 @@ echo "Verification index = 2" >> ${CSF_TEMPLATE}.csf-config
 echo "Blocks = ${HAB_BLOCKS} \"${WORK_FILE}.mod\"" >> ${CSF_TEMPLATE}.csf-config
 
 # generate the signatures, certificates, ... in the CSF binary
-${CST_BINARY} --o ${WORK_FILE}_csf.bin --i ${CSF_TEMPLATE}.csf-config
+${CST_BINARY} --o ${WORK_FILE}_csf.bin --i ${CSF_TEMPLATE}.csf-config > $OUT
 
 # for m4app binary combine padded .mod file w/ CSF offset written
 if [ "${SIGN_M4APP}" = "1" ]; then
@@ -265,6 +271,7 @@ if [ "${SIGN_M4APP}" = "1" ]; then
 else
     cat ${WORK_FILE} ${WORK_FILE}_csf.bin > ${WORK_FILE}.signed
 fi
+echo "Process completed successfully and signed file is ${WORK_FILE}.signed"
 
 # Cleanup config / mod SPL
 rm ${CSF_TEMPLATE}.csf-config
