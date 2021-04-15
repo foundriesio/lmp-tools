@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 # Copyright (C) 2021 Foundries.IO
 #
@@ -8,19 +8,17 @@
 DIR=$(dirname $0)
 FILE=${FUSE_DEST:-${DIR}/fuse.uuu}
 FUSEBIN=${FUSEBIN:-cst-3.3.1/crts/SRK_1_2_3_4_fuse.bin}
-TORADEX=
 
 usage() {
-    echo -e "Usage: $0 [-s source_file] [-d destination_file] [-t]
+    echo -e "Usage: $0 [-s source_file] [-d destination_file]
 where:
-   -t adds Toradex PIDs for Fastboot in u-boot
    source_file defaults to cst-3.3.1/crts/SRK_1_2_3_4_fuse.bin
    destination file defaults to ${DIR}/fuse.uuu
 " 1>&2
     exit 1
 }
 
-while getopts ":s:d:t" arg; do
+while getopts ":s:d:" arg; do
     case "${arg}" in
         s)
             FUSEBIN="${OPTARG}"
@@ -28,16 +26,7 @@ while getopts ":s:d:t" arg; do
         d)
             FILE="${OPTARG}"
             ;;
-        t)
-            if [ -f $DIR/../toradex.cfg ]
-            then
-              TORADEX=$(cat $DIR/../toradex.cfg)
-            else
-              echo "No toradex config available"
-              usage
-            fi
-            ;;
-        *)
+        s)
             usage
             ;;
     esac
@@ -65,29 +54,24 @@ then
     echo "destination directory '${DIR}' missing"
 fi
 
-
 (cat << EOF
 uuu_version 1.2.39
-$TORADEX
 
-SDP: boot -f SPL-mfgtool.signed
+SDP: boot -f SPL-mfgtool.signed -dcdaddr 0x0907000 -cleardcd
 
-SDPU: delay 1000
+SDPV: delay 1000
 SDPV: write -f u-boot-mfgtool.itb
-SDPU: jump
+SDPV: jump
 
 EOF
-HASH=($(hexdump -e '/4 "0x"' -e '/4 "%X""\n"' ${FUSEBIN}))
-OFFSET=0
-for bank in 6 7
+
+bank=3
+idx=0
+for val in $(hexdump -e '/4 "0x"' -e '/4 "%X""\n"' ${FUSEBIN})
 do
-    for idx in $(seq 0 3)
-    do
-        echo "FB: ucmd fuse prog -y ${bank} ${idx} ${HASH[$((${idx}+${OFFSET}))]}"
-    done
-    OFFSET=4
+	echo "FB: ucmd fuse prog -y ${bank} ${idx} ${val}"
+	idx=$((idx+1))
 done
-echo
 echo "FB: acmd reset"
 echo
 echo "FB: DONE") > ${FILE}

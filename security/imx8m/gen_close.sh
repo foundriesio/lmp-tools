@@ -8,23 +8,34 @@
 DIR=$(dirname $0)
 FILE=${CLOSE_DEST:-${DIR}/close.uuu}
 FUSEBIN=${FUSEBIN:-cst-3.3.1/crts/SRK_1_2_3_4_fuse.bin}
+TORADEX=
 
 usage() {
-    echo -e "Usage: $0 [-s source_file] [-d destination_file]
+    echo -e "Usage: $0 [-s source_file] [-d destination_file] [-t]
 where:
+   -t adds Toradex PIDs for Fastboot in u-boot
    source_file defaults to cst-3.3.1/crts/SRK_1_2_3_4_fuse.bin
    destination file defaults to ${DIR}/close.uuu
 " 1>&2
     exit 1
 }
 
-while getopts ":s:d:" arg; do
+while getopts ":s:d:t" arg; do
     case "${arg}" in
         s)
             FUSEBIN="${OPTARG}"
             ;;
         d)
             FILE="${OPTARG}"
+            ;;
+        t)
+            if [ -f $DIR/../toradex.cfg ]
+            then
+              TORADEX=$(cat $DIR/../toradex.cfg)
+            else
+              echo "No toradex config available"
+              usage
+            fi
             ;;
         *)
             usage
@@ -58,6 +69,7 @@ fi
 uuu_version 1.2.39
 
 SDP: boot -f SPL-mfgtool.signed
+$TORADEX
 
 SDPU: delay 1000
 SDPV: write -f u-boot-mfgtool.itb

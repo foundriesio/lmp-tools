@@ -8,34 +8,23 @@
 DIR=$(dirname $0)
 FILE=${CLOSE_DEST:-${DIR}/close.uuu}
 FUSEBIN=${FUSEBIN:-cst-3.3.1/crts/SRK_1_2_3_4_fuse.bin}
-TORADEX=
 
 usage() {
-    echo -e "Usage: $0 [-s source_file] [-d destination_file] [-t]
+    echo -e "Usage: $0 [-s source_file] [-d destination_file]
 where:
-   -t adds Toradex PIDs for Fastboot in u-boot
    source_file defaults to cst-3.3.1/crts/SRK_1_2_3_4_fuse.bin
    destination file defaults to ${DIR}/close.uuu
 " 1>&2
     exit 1
 }
 
-while getopts ":s:d:t" arg; do
+while getopts ":s:d:" arg; do
     case "${arg}" in
         s)
             FUSEBIN="${OPTARG}"
             ;;
         d)
             FILE="${OPTARG}"
-            ;;
-        t)
-            if [ -f $DIR/../toradex.cfg ]
-            then
-              TORADEX=$(cat $DIR/../toradex.cfg)
-            else
-              echo "No toradex config available"
-              usage
-            fi
             ;;
         *)
             usage
@@ -68,12 +57,11 @@ fi
 (cat << EOF
 uuu_version 1.2.39
 
-SDP: boot -f SPL-mfgtool.signed
-$TORADEX
+SDP: boot -f SPL-mfgtool.signed -dcdaddr 0x0907000 -cleardcd
 
 SDPV: delay 1000
-SDPV: write -f u-boot-mfgtool.itb -addr 0x12000000
-SDPV: jump -addr 0x12000000
+SDPV: write -f u-boot-mfgtool.itb
+SDPV: jump
 
 FB: ucmd if mmc dev 0; then setenv fiohab_dev 0; else setenv fiohab_dev 1; fi;
 
