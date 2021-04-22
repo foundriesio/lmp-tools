@@ -89,7 +89,7 @@ echo.FB: ucmd setenv srk_5 0x!line:~46,2!!line:~44,2!!line:~42,2!!line:~40,2!
 echo.FB: ucmd setenv srk_6 0x!line:~54,2!!line:~52,2!!line:~50,2!!line:~48,2!
 echo.FB: ucmd setenv srk_7 0x!line:~62,2!!line:~60,2!!line:~58,2!!line:~56,2!
 echo.
-echo.FB: ucmd if fiohab_close; then echo Platform Secured; else echo Error, Can Not Secure the Platform; fi
+echo.FB[-t 1000]: ucmd if fiohab_close; then echo Platform Secured; else echo Error, Can Not Secure the Platform; sleep 2; fi
 echo.FB: acmd reset
 echo.
 echo.FB: DONE
