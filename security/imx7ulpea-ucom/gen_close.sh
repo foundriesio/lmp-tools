@@ -76,7 +76,7 @@ do
     echo
 done
 cat << EOF
-FB: ucmd if fiohab_close; then echo Platform Secured; else echo Error, Can Not Secure the Platform; fi
+FB[-t 1000]: ucmd if fiohab_close; then echo Platform Secured; else echo Error, Can Not Secure the Platform; sleep 2; fi
 FB: acmd reset
 
 FB: DONE
