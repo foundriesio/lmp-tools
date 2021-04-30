@@ -1,0 +1,92 @@
+#!/bin/sh
+# -*- mode: shell-script-mode; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-
+#
+# Copyright (C) 2021 Foundries.io
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# break on errors
+set -e
+
+# set defaults
+GH=https://raw.githubusercontent.com
+SRC=$GH/foundriesio/lmp-manifest/master/lmp-base.xml
+REPO="${REPO-../meta-lmp}"
+NAME=$(basename $0)
+
+
+usage() {
+    echo "usage: $NAME [-r|--repo path] [start [end]]" >&2
+    echo "  where optional parameters:" >&2
+    echo "    'path' is path to meta-lmp repo [default: $REPO]" >&2 
+    echo "    'end' is ending hash            [default: HEAD]" >&2
+    echo "    'start' is starting hash        [default: in lmp-manifest]" >&2
+    exit 1
+}
+
+while [ ${#} -gt 0 ]
+do
+    case ${1} in
+    -r|--repo)
+        REPO=${2}
+        shift
+        shift
+       ;;
+    -*)
+        usage
+        ;;
+    *)
+        if [ "$hash_init" = "" ]
+        then
+            hash_init=$2
+            shift
+        else
+            if [ "$hash_end" = "" ]
+            then
+                hash_end=$2
+                shift
+            else
+                usage
+            fi
+        fi
+    esac
+done
+
+if [ "$hash_end" = "" ]
+then
+    hash_end=HEAD
+fi
+
+if [ "$hash_init" = "" ]
+then
+    hash_init=$(wget -O- $SRC 2> /dev/null | grep meta-lmp | sed 's/^.*revision="//;s:"/>$::')
+fi
+
+if [ ! -d "$REPO" ]
+then
+    echo "Missing repo meta-lmp" >&2
+    usage
+fi
+
+cd "$REPO"
+if [ ! -e .git/config ]
+then
+    echo "$REPO not a repository" >&2
+    usage
+fi
+
+url=$(basename $(grep -m 1 url .git/config | sed 's:^.*/::'))
+
+if [ "${url%%.git}" != "meta-lmp" ]
+then
+    echo "'$url' is not meta-lmp repository" >&2
+    usage
+fi
+
+(
+echo "Relevant changes:"
+git log --no-decorate --oneline ${hash_init}..${hash_end} |
+    sed 's/^/- /'
+) | tee /tmp/changes.txt
+
+exit 0
