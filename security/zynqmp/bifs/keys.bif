@@ -1,0 +1,7 @@
+the_ROM_image:
+{
+	[ppkfile] <keys/PPK.pem>
+	[pskfile] <keys/PSK.pem>
+	[spkfile] <keys/SPK.pem>
+	[sskfile] <keys/SSK.pem>
+}

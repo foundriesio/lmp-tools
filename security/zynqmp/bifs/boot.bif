@@ -1,0 +1,7 @@
+the_ROM_image:
+{
+	[pskfile] keys/PSK.pem
+	[sskfile] keys/SSK.pem
+	[pmufw_image, load=0xffdc0000] pmu.bin
+	[bootloader, authentication=rsa, destination_cpu=a53-0, load=0xfffc0000] u-boot-spl.bin
+}
