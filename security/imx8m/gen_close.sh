@@ -68,7 +68,7 @@ fi
 (cat << EOF
 uuu_version 1.2.39
 
-SDP: boot -f SPL-mfgtool.signed
+SDP: boot -f imx-boot-mfgtool.signed
 $TORADEX
 
 SDPU: delay 1000
