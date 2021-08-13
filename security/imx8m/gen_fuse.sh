@@ -70,7 +70,7 @@ fi
 uuu_version 1.2.39
 $TORADEX
 
-SDP: boot -f SPL-mfgtool.signed
+SDP: boot -f imx-boot-mfgtool.signed
 
 SDPU: delay 1000
 SDPV: write -f u-boot-mfgtool.itb
