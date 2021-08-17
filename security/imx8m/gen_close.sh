@@ -75,7 +75,7 @@ SDPV: delay 1000
 SDPV: write -f u-boot-mfgtool.itb
 SDPV: jump
 
-FB: ucmd if mmc dev 0; then setenv fiohab_dev 0; else setenv fiohab_dev 1; fi;
+FB: ucmd if mmc dev 2; then setenv fiohab_dev 2; else setenv fiohab_dev 1; fi;
 
 EOF
 HASH=($(hexdump -e '/4 "0x"' -e '/4 "%X""\n"' ${FUSEBIN}))
