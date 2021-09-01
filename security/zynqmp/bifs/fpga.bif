@@ -1,0 +1,6 @@
+the_ROM_image:
+{
+	[pskfile] keys/PSK.pem
+	[sskfile] keys/SSK.pem
+	[destination_device=pl, authentication=rsa] fpga.bit
+}
