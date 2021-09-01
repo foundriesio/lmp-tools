@@ -1,5 +1,6 @@
 the_ROM_image:
 {
+	[auth_params] ppk_select=0; spk_id=0x00000000
 	[pskfile] keys/PSK.pem
 	[sskfile] keys/SSK.pem
 	[destination_device=pl, authentication=rsa] fpga.bit
