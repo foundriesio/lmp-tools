@@ -24,6 +24,11 @@ Helper scripts:
  4) check_bootbin.sh
     dumps the boot-header information on boot.bin and verifies the bootable image
 
+ 5) generate_fpga.sh
+    accepting the keys and a bitstream, generates a signed fpga bitstream. Notice that signed
+    FPGAs will be authenticated by the firwmare and therefore they require an adjusted FIT load
+    command in SPL or the load will fail.
+
 For clarity, this README shall include references to an hypotetical
 target board (from now on THE_TARGET).
 
