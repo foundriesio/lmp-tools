@@ -59,9 +59,9 @@ uuu_version 1.2.39
 
 SDP: boot -f SPL-mfgtool.signed
 
-SDPU: delay 1000
+SDPV: delay 1000
 SDPV: write -f u-boot-mfgtool.itb
-SDPU: jump
+SDPV: jump
 
 FB: ucmd if mmc dev 0; then setenv fiohab_dev 0; else setenv fiohab_dev 1; fi;
 
