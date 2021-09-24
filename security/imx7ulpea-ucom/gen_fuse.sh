@@ -60,9 +60,9 @@ uuu_version 1.2.39
 
 SDP: boot -f SPL-mfgtool.signed
 
-SDPU: delay 1000
+SDPV: delay 1000
 SDPV: write -f u-boot-mfgtool.itb
-SDPU: jump
+SDPV: jump
 
 EOF
 HASH=($(hexdump -e '/4 "0x"' -e '/4 "%X""\n"' ${FUSEBIN}))
