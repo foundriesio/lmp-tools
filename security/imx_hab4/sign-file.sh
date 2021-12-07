@@ -159,6 +159,8 @@ fi
 
 if [ "${SRK_INDEX}" != "1" ]
 then
+    sed -i~ "s^${KEY_DIR}/IMG_1_crt.pem^${KEY_DIR}/IMG_${SRK_INDEX}_crt.pem^" ${CSF_TEMPLATE}.csf-config
+    sed -i~ "s^${KEY_DIR}/CSF_1_crt.pem^${KEY_DIR}/CSF_${SRK_INDEX}_crt.pem^" ${CSF_TEMPLATE}.csf-config
     sed -i~ "s/^Source index =.*/Source index = $((${SRK_INDEX} - 1))/" ${CSF_TEMPLATE}.csf-config
 fi
 
