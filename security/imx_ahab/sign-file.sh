@@ -131,5 +131,4 @@ echo "Process completed successfully and signed file is ${WORK_FILE}.signed"
 # Cleanup config / mod SPL
 rm ${CSF_TEMPLATE}.csf-config
 rm -f ${CSF_TEMPLATE}.csf-config~
-rm ${WORK_FILE}_csf.bin
 rm ${WORK_FILE}.mod
