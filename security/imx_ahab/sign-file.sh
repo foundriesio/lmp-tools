@@ -25,6 +25,7 @@ DISPLAY_USAGE=0
 SIGN_SPL=0
 SRK_INDEX=1
 ENGINE=
+ENABLE_REVOKE=0
 OUT=/dev/null
 
 parse_args()
@@ -58,6 +59,10 @@ parse_args()
             shift
             shift
             ;;
+        --enable-revoke)
+            ENABLE_REVOKE=1
+            shift
+            ;;
         -h)
             DISPLAY_USAGE=1
             shift
@@ -87,6 +92,7 @@ if [ "${DISPLAY_USAGE}" = "1" ]; then
     echo "  --spl: SPL binary to sign             [--spl is required]"
     echo "  --key-dir: location for key files     [default: ${KEY_DIR}]"
     echo "  --srk-index: the key to sign with     [default: 1]"
+    echo "  --enable-revoke: set CSF to unlock write access to SRK_REVOKE [default: ${ENABLE_REVOKE}]"
     echo "  --verbose: display output of cst tool"
     exit 0
 fi
@@ -121,6 +127,13 @@ fi
 
 # working file used for signature
 cp ${WORK_FILE} ${WORK_FILE}.mod
+
+# enable revocation
+if [ "${ENABLE_REVOKE}" = "1" ]; then
+	echo "\n[Unlock]" >> ${CSF_TEMPLATE}.csf-config
+	echo "Engine = OCOTP" >> ${CSF_TEMPLATE}.csf-config
+	echo "Features = SRK REVOKE" >> ${CSF_TEMPLATE}.csf-config
+fi
 
 # generate the signatures, certificates, ... in the CSF binary
 echo "Invoking CST to sign the binary"
