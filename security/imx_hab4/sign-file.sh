@@ -221,12 +221,12 @@ else
 	HAB_IVT_SELF=$(od -An -t x4 -j 0x14 -N 4 ${WORK_FILE}.mod | awk '{print $1}')
 fi
 
-# get HAB length using stat
-HAB_LEN=$(printf "0x%08x" `wc -c < ${WORK_FILE}.mod`)
-
-# insert CSF offset into m4app binary (as it isn't set by default)
-# adjust boot data size to include CSF
 if [ "${SIGN_M4APP}" = "1" ]; then
+    # get HAB length using stat (HAB_LEN == size of binary)
+    HAB_LEN=$(printf "0x%08x" `wc -c < ${WORK_FILE}.mod`)
+
+    # insert CSF offset into m4app binary (as it isn't set by default)
+    # adjust boot data size to include CSF
     # remove header from HAB length
     HAB_LEN=$(printf "0x%08x" $((${HAB_LEN} - 0x1000)))
     # insert CSF offset
@@ -252,6 +252,10 @@ if [ "${SIGN_M4APP}" = "1" ]; then
     # write the modified boot_data size to binary @ 0x1024
     dd if=${WORK_FILE}.boot_data of=${WORK_FILE}.mod seek=4132 bs=1 conv=notrunc 2>/dev/null
     rm ${WORK_FILE}.boot_data
+else
+    HAB_CSF_SELF=$(od -An -t x4 -j 0x18 -N 4 ${WORK_FILE}.mod | awk '{print $1}')
+    # set HAB length as CSF pointer - IVT pointer
+    HAB_LEN=$(printf "0x%08x" $((0x${HAB_CSF_SELF} - 0x${HAB_IVT_SELF})))
 fi
 
 # generate HAB block information
@@ -284,7 +288,10 @@ ${CST_BINARY} --o ${WORK_FILE}_csf.bin --i ${CSF_TEMPLATE}.csf-config > $OUT
 if [ "${SIGN_M4APP}" = "1" ]; then
     cat ${WORK_FILE}.mod ${WORK_FILE}_csf.bin > ${WORK_FILE}.signed
 else
-    cat ${WORK_FILE} ${WORK_FILE}_csf.bin > ${WORK_FILE}.signed
+    # We use the *.mod file in the the csf-config (in case we needed to clear the DCD info).
+    # But, we always use the original binary for repackaging with the CSF.
+    cp ${WORK_FILE} ${WORK_FILE}.signed
+    dd if=${WORK_FILE}_csf.bin of=${WORK_FILE}.signed seek=$((${HAB_LEN})) bs=1 conv=notrunc
 fi
 echo "Process completed successfully and signed file is ${WORK_FILE}.signed"
 
