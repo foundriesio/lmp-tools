@@ -6,12 +6,39 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-# set defaults
-foundries_manifest="https://github.com/foundriesio/lmp-manifest"
-latest=${1}
-
 # break on errors
 set -e
+
+PARENT_FILE=${PARENT_FILE:-conf/update-manifest.conf}
+NAME=$(basename $0)
+CONF=0
+
+usage() {
+    echo "ERROR: $1" >&2
+    echo >&2
+    echo "usage: $NAME [options] [tag or sha]" >&2
+    echo "      where options are:" >&2
+    echo "             [-u|--url <update manifest URL> -p|--prefix <tag prefix>]" >&2
+    echo "             [-w|--write-conf <write update manifest definition file>]" >&2
+    echo >&2
+    echo "note: current working directory should be a manifest repo" >&2
+    exit 1
+}
+
+#
+# source a files but only specific variable assignments
+secure_source()
+{
+    TOPICS="URL PREFIX"
+    TMPFILE="/tmp/$$"
+    rm -f "${TMPFILE}"
+    for topic in ${TOPICS}
+    do
+        grep "^${topic}=" $1 | grep -v -e '\$' -e "\`" >> ${TMPFILE} || true
+    done
+    . "${TMPFILE}"
+    rm -f "${TMPFILE}"
+}
 
 abort_merge()
 {
@@ -27,6 +54,65 @@ abort_merge()
     fi
     exit 1
 }
+
+#
+# assumption on the parsing that options are first
+while [ ${#} -gt 0 ]
+do
+    case ${1} in
+    -w|--write-conf)
+        CONF=1
+        shift
+        ;;
+    -p|--prefix)
+        [ -z "${2}" ] && usage "missing prefix argument"
+        PREFIX="${2}"
+        shift
+        shift
+        ;;
+    -u|--url)
+        [ -z "${2}" ] && usage "missing url argument"
+        URL="${2}"
+        shift
+        shift
+        ;;
+    -*)
+        usage "Invalid option '${1}'"
+        ;;
+    *)
+        break
+        ;;
+    esac
+done
+
+if [ \( -z "${URL}" -a -n "${PREFIX}" \) -o \( -n "${URL}" -a -z "${PREFIX}" \) ]; then
+    usage "url and prefix must both be present"
+fi
+
+if [ ${CONF} -eq 1 ]; then
+    if [ -n "${URL}" ]; then
+        echo "URL=${URL}" > "${PARENT_FILE}"
+        echo "PREFIX=${PREFIX}" >> "${PARENT_FILE}"
+        echo "Update manifest definition file created"
+        echo "Use git add and git commit to include it"
+        exit 0
+    else
+        usage "Missing content for definition file"
+    fi
+fi
+
+#
+# the argument has the highest priority
+latest=${1}
+
+if [ -e "${PARENT_FILE}" ]; then
+    secure_source "${PARENT_FILE}"
+    foundries_manifest="${URL}"
+fi
+if [ -z "$foundries_manifest" ]; then
+    # set defaults
+    foundries_manifest="https://github.com/foundriesio/lmp-manifest"
+fi
 
 # get current branch
 local_branch=$(git rev-parse --abbrev-ref HEAD)
@@ -44,8 +130,13 @@ git fetch --tags --quiet ${foundries_manifest}
 
 # if no tag parameter was supplied use latest upstream tag
 if [ -z "${latest}" ]; then
-    # assign last upstream tag to latest
-    latest=$(git describe --tags --abbrev=0 FETCH_HEAD)
+    if [ -z "${PREFIX}" ]; then
+        # assign last upstream tag to latest
+        latest=$(git describe --tags --abbrev=0 FETCH_HEAD)
+    else
+        # assign last upstream prefixed tag to latest
+        latest=$(git describe --tags --abbrev=0 --match "${PREFIX}-*" FETCH_HEAD)
+    fi
 fi
 
 # check to see if last upstream tag is already included in HEAD (if so exit)
