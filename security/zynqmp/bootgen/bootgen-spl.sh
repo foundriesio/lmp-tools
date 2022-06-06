@@ -16,8 +16,7 @@ case $option in
     1)
 	git clone https://github.com/Xilinx/bootgen.git build
 	cd build
-	git checkout -b 2021.1 34c4313a09dd75cf6ff5b188136e1a077c5b0aa2
-	git am ../zynqmp-spl.patch
+	git checkout -b xilinx_v2022.1 4eac958eb6c831ffa5768a0e2cd4be23c5efe2e0
 	;;
     2)
 	mkdir build
