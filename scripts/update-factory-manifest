@@ -14,12 +14,17 @@ NAME=$(basename $0)
 CONF=0
 
 usage() {
-    echo "ERROR: $1" >&2
+    if [ "$1" != "help" ]; then
+        echo "ERROR: $1" >&2
+    fi
     echo >&2
     echo "usage: $NAME [options] [tag or sha]" >&2
     echo "      where options are:" >&2
     echo "             [-u|--url <update manifest URL> -p|--prefix <tag prefix>]" >&2
     echo "             [-w|--write-conf <write update manifest definition file>]" >&2
+    echo "             [-c|--confirm do the update without a prompt" >&2
+    echo "             [-d|--dry-run show what will be done but no changes" >&2
+    echo "             [-h|--help ouputs this usage message " >&2
     echo >&2
     echo "note: current working directory should be a manifest repo" >&2
     exit 1
@@ -75,6 +80,17 @@ do
         URL="${2}"
         shift
         shift
+        ;;
+    -c|--confirm)
+        CONFIRM=y
+        shift
+        ;;
+    -d|--dry-run)
+        DRY=y
+        shift
+        ;;
+    -h|--help)
+        usage "help"
         ;;
     -*)
         usage "Invalid option '${1}'"
@@ -153,6 +169,21 @@ fi
 
 echo "New upstream release(s) have been found."
 echo "Merging local code with upstream release: ${latest}"
+
+if [ "$DRY" = "y" ]; then
+    echo "git merge --no-edit -m \"update-manifest: merge LmP ${latest}\" ${latest}"
+    echo "git push origin HEAD:${remote_branch} && git push --tags origin"
+    exit 0
+fi
+
+while [ "$CONFIRM" != "y" -a "$CONFIRM" != "n" ]; do
+    echo -n "Proceed ? (y/n): "
+    read CONFIRM
+done
+
+if [ "$CONFIRM" = "n" ]; then
+    exit 0
+fi
 
 # merge to the last upstream tag
 git merge --no-edit -m "update-manifest: merge LmP ${latest}" ${latest} || abort_merge $?
