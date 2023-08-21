@@ -41,10 +41,16 @@ cat /etc/os-release
 echo
 
 if [ -f /var/sota/current-target ]; then
-      echo "*** current_target ***"
-      cat /var/sota/current-target
+    echo "*** current_target ***"
+    cat /var/sota/current-target
+    echo
 fi
-echo
+
+if [ -f /var/sota/sota.toml ]; then
+    echo "*** sota.toml ***"
+    cat /var/sota/sota.toml
+    echo
+fi
 
 echo "*** active networks ***"
 ip -family inet addr
@@ -123,6 +129,11 @@ EOF
             -connect $SERV < /dev/null
         rm -f /tmp/client.pem /tmp/engine.cnf
     fi
+    device=$(aktualizr-lite status 2> /dev/null | grep name)
+    if [ -n "$device" ]; then
+        echo "*** requested device name ***"
+	echo $device
+    fi
 else
     echo "*** not registered import version ***"
     cat /var/sota/import/installed_versions
@@ -131,6 +142,10 @@ echo
 
 echo "*** Aktualizr-lite status ***"
 systemctl status aktualizr-lite | cat
+echo
+
+echo "*** fioconfig status ***"
+systemctl status fioconfig | cat
 echo
 
 echo "*** Docker images ***"
