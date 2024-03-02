@@ -3,7 +3,7 @@
 #
 # Copyright (C) 2021 Foundries.io
 #
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BSD-3-Clause
 #
 # break on errors
 set -e

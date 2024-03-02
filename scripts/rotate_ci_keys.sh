@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2023 Foundries.io
 #
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: BSD-3-Clause
 #
 # Authors:
 #    Tim Anderson <tim.anderson@foundries.io>
