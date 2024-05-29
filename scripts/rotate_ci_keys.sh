@@ -63,7 +63,7 @@ x509_extensions = myexts
 
 [ req_distinguished_name ]
 #O = Unspecified company
-CN = Default insecure development key
+CN = Factory kernel module signing key
 #emailAddress = unspecified.user@unspecified.company
 
 [ myexts ]
