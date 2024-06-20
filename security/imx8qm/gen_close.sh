@@ -93,7 +93,7 @@ done
 echo
 cat << EOF
 FB[-t 1000]: ucmd if fiohab_close; then echo Platform Secured; else echo Error, Can Not Secure the Platform; sleep 2; fi
-FB: acmd reset
+FB: acmd reboot
 
 FB: DONE
 EOF

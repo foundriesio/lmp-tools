@@ -93,5 +93,5 @@ do
     echo "FB: ucmd fuse prog -y ${bank} ${idx} ${HASH[$((${idx}-${OFFSET}))]}"
 done
 echo
-echo "FB: acmd reset"
+echo "FB: acmd reboot"
 echo "FB: DONE") > ${FILE}
