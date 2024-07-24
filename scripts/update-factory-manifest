@@ -142,7 +142,13 @@ if [ -z "${remote_branch}" ]; then
 fi
 
 # fetch tags from upstream
-git fetch --tags --quiet ${foundries_manifest}
+if [ -z "${PREFIX}" ]; then
+    git fetch --tags --quiet ${foundries_manifest}
+else
+    # only fetch tags matching PREFIX
+    git ls-remote --tags ${foundries_manifest} | cut -f2 | grep 'refs/tags/${PREFIX}' | xargs git fetch ${foundries_manifest}
+fi
+
 
 # if no tag parameter was supplied use latest upstream tag
 if [ -z "${latest}" ]; then
@@ -191,4 +197,9 @@ git merge --no-edit -m "update-manifest: merge LmP ${latest}" ${latest} || abort
 echo ""
 echo "Automatic update successful!"
 
-git push origin HEAD:${remote_branch} && git push --tags origin
+if [ -z "${PREFIX}" ]; then
+    git push origin HEAD:${remote_branch} && git push --tags origin
+else
+    # only push tags matching the PREFIX
+    git push origin HEAD:${remote_branch} && git push origin refs/tags/${PREFIX}*:refs/tags/${PREFIX}*
+fi
