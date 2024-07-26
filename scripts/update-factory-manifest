@@ -146,7 +146,7 @@ if [ -z "${PREFIX}" ]; then
     git fetch --tags --quiet ${foundries_manifest}
 else
     # only fetch tags matching PREFIX
-    git ls-remote --tags ${foundries_manifest} | cut -f2 | grep 'refs/tags/${PREFIX}' | xargs git fetch ${foundries_manifest}
+    git fetch --no-tags ${foundries_manifest} "refs/tags/${PREFIX}*:refs/tags/${PREFIX}*"
 fi
 
 
