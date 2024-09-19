@@ -16,9 +16,9 @@ which uuidgen > /dev/null || { echo "E: You must have uuidgen" && exit 1; }
 openssl req -x509 -sha256 -newkey rsa:2048 -subj "/CN=${CN} PK/" -keyout PK.key -out PK.crt -nodes -days 3650
 # Create KEK
 openssl req -x509 -sha256 -newkey rsa:2048 -subj "/CN=${CN} KEK/" -keyout KEK.key -out KEK.crt -nodes -days 3650
-# Create DB
+# Create db
 openssl req -x509 -sha256 -newkey rsa:2048 -subj "/CN=${CN} DB/" -keyout DB.key -out DB.crt -nodes -days 3650
-# Create DBX
+# Create dbx
 openssl req -x509 -sha256 -newkey rsa:2048 -subj "/CN=${CN} DBX/" -keyout DBX.key -out DBX.crt -nodes -days 3650
 
 # No CSR is performed here, but can be done by the user (for KEK and DBs) if a valid CA is available
@@ -38,8 +38,8 @@ cert-to-efi-sig-list -g "$(uuidgen)" DBX.crt DBX.esl
 # Generate AUTH files (some tools require signed ESL files even when secure boot is not enforced)
 sign-efi-sig-list -c PK.crt -k PK.key PK PK.esl PK.auth
 sign-efi-sig-list -c PK.crt -k PK.key KEK KEK.esl KEK.auth
-sign-efi-sig-list -c KEK.crt -k KEK.key DB DB.esl DB.auth
-sign-efi-sig-list -c KEK.crt -k KEK.key DBX DBX.esl DBX.auth
+sign-efi-sig-list -c KEK.crt -k KEK.key db DB.esl DB.auth
+sign-efi-sig-list -c KEK.crt -k KEK.key dbx DBX.esl DBX.auth
 cp PK.esl PKnoauth.auth
 
 echo "Keys and certificates created successfully"
