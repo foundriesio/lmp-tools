@@ -9,8 +9,8 @@ network, and TLS keys and in general secure directories.
 The script is available in the lmp-tools repo. To downloaded and setup:
 
 ```
-wget https://raw.githubusercontent.com/foundriesio/lmp-tools/master/device-scripts/diag.sh
-chmod 755 diag.sh
+wget https://raw.githubusercontent.com/foundriesio/lmp-tools/master/device-scripts/fio-diag.sh
+chmod 755 fio-diag.sh
 sudo -s
 ```
 
@@ -21,7 +21,7 @@ The script can be placed in any location on a device typically in either `root/`
 The recommended way to execute it is:
 
 ```
-# ./diag.sh | tee results.txt
+# ./fio-diag.sh | tee results.txt
 ```
 
 ## Results
