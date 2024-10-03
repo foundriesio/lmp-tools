@@ -42,5 +42,11 @@ sign-efi-sig-list -c KEK.crt -k KEK.key db DB.esl DB.auth
 sign-efi-sig-list -c KEK.crt -k KEK.key dbx DBX.esl DBX.auth
 cp PK.esl PKnoauth.auth
 
+# Generate empty AUTH files (to disable SecureBoot by removing PK,KEK and db/dbx)
+touch noKEK.esl
+sign-efi-sig-list -t "$(date --date='1 second' +'%Y-%m-%d %H:%M:%S')" -c KEK.crt -k KEK.key KEK noKEK.esl noKEK.auth
+touch noPK.esl
+sign-efi-sig-list -t "$(date --date='1 second' +'%Y-%m-%d %H:%M:%S')" -c PK.crt -k PK.key PK noPK.esl noPK.auth
+
 echo "Keys and certificates created successfully"
 echo "To sign an EFI image (bootloader/kernel): sbsign --key DB.key --cert DB.crt Image"

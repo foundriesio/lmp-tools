@@ -36,7 +36,12 @@ Provisioning the keys can be done:
       Using a custom EFI program with the certificates embedded on it.
       This should be the common way of deploying to devices.
 
-2) Sign images:
+2) Removing the provisioned keys using your own efi application:
+----------------------------------------------------------------
+Deactivating Secure Boot can be done by removing the enrolled certificates using setvar().
+To that end, we also generate the corresponding noPK.auth and noKEK.auth used to clear PK, KEK, db and dbx.
+
+3) Sign images:
 ---------------
 The DB private key must be made available to LmP during build time so that
 the bootloader and kernel image can be signed.
