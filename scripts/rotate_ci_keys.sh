@@ -51,9 +51,7 @@ echo "making kernel module key"
 GENKEY=factory-keys/x509.genkey
 if [ ! -f $GENKEY ]
 then
-	if [ ! conf/keys/x509.genkey ]
-	then
-		cat > factory-keys/x509.genkey <<EOF
+	cat > $GENKEY <<EOF
 [ req ]
 default_bits = 4096
 distinguished_name = req_distinguished_name
@@ -72,9 +70,6 @@ keyUsage=digitalSignature
 subjectKeyIdentifier=hash
 authorityKeyIdentifier=keyid
 EOF
-	else
-		cp conf/keys/x509.genkey $GENKEY
-	fi
 fi
 openssl req -new -nodes -utf8 -sha256 -days 36500 -batch -x509 \
 	-config $GENKEY -outform PEM \
