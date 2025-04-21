@@ -8,6 +8,8 @@
 #    Tim Anderson <tim.anderson@foundries.io>
 set -e
 
+trap 'echo "Fail! command executed unsuccessfully"' ERR
+
 if [ "$(basename $PWD)" != "lmp-manifest" ]
 then
 	echo "run in lmp-manifest directory"
