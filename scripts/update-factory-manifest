@@ -154,7 +154,7 @@ fi
 if [ -z "${latest}" ]; then
     if [ -z "${PREFIX}" ]; then
         # assign last upstream tag to latest
-        latest=$(git describe --tags --abbrev=0 FETCH_HEAD)
+        latest=$(git tag --list --sort=-version:refname "[1-9]*" | head -n1)
     else
         # assign last upstream prefixed tag to latest
         latest=$(git tag --list --sort=-version:refname "${PREFIX}-*" | head -n1)
