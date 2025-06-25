@@ -191,8 +191,18 @@ if [ "$CONFIRM" = "n" ]; then
     exit 0
 fi
 
+_git_merge_try_fix_keys(){
+    git merge --abort
+    git merge --no-commit ${latest}
+    # all of this keys are removed at factory creation so drop it all
+    git rm -f -r conf/keys
+    git commit --no-edit -m "update-manifest: merge (with conf/key conflicts) LmP ${latest}" ${latest}
+}
+
 # merge to the last upstream tag
-git merge --no-edit -m "update-manifest: merge LmP ${latest}" ${latest} || abort_merge $?
+git merge --no-edit -m "update-manifest: merge LmP ${latest}" ${latest} || \
+_git_merge_try_fix_keys || \
+abort_merge $?
 
 echo ""
 echo "Automatic update successful!"
