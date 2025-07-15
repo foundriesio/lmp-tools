@@ -9,6 +9,14 @@
 # break on errors
 set -e
 
+# Check for required commands
+for cmd in grep xargs git; do
+    if ! command -v "$cmd" >/dev/null 2>&1; then
+        echo "ERROR: Required command '$cmd' not found in PATH." >&2
+        exit 1
+    fi
+done
+
 PARENT_FILE=${PARENT_FILE:-conf/update-manifest.conf}
 NAME=$(basename $0)
 CONF=0
