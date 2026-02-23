@@ -12,7 +12,7 @@
 #    Vanessa Maegima <vanessa.maegima@foundries.io>
 #    Caio Pereira <caio.pereira@foundries.io>
 
-VERSION=1.1
+VERSION=1.2
 
 SPEED=0
 while [ ${#} -gt 0 ]; do
@@ -53,6 +53,16 @@ fi
 if [ -f /var/sota/sota.toml ]; then
     echo "*** sota.toml ***"
     cat /var/sota/sota.toml
+    echo
+fi
+
+if [ -d /etc/sota/conf.d ]; then
+    echo "*** /etc/sota/conf.d contents ***"
+    for i in $(ls /etc/sota/conf.d/*)
+    do
+      echo "**** $i ****"
+      cat "$i"
+    done
     echo
 fi
 
