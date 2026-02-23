@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (C) 2023 Foundries.io
+# Copyright (C) 2023, 2026 Foundries.io
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -12,7 +12,7 @@
 #    Vanessa Maegima <vanessa.maegima@foundries.io>
 #    Caio Pereira <caio.pereira@foundries.io>
 
-VERSION=1.0
+VERSION=1.1
 
 SPEED=0
 while [ ${#} -gt 0 ]; do
@@ -38,6 +38,10 @@ echo
 
 echo "*** os-release ***"
 cat /etc/os-release
+echo
+
+echo "*** storage status ***"
+df -h
 echo
 
 if [ -f /var/sota/current-target ]; then
@@ -188,11 +192,16 @@ echo
 
 if [ ${SPEED} -eq 1 ]; then
     echo "*** speed test ***"
-    server_host="http://speedtest.ftp.otenet.gr/files/test10Mb.db"
-    result=$(/usr/bin/time -p wget -O /dev/null -o /dev/stdout $server_host 2>&1)
+    server_host="http://www.kernel.org/pub/linux/devel/binutils/binutils-2.11.92.0.12.3.tar.gz"
+    type curl 2>&1 > /dev/null
+    if [ $? -eq 0 ]; then
+      result=$(/usr/bin/time -p curl -L -o /dev/null $server_host 2>&1)
+    else
+      result=$(/usr/bin/time -p wget -O /dev/null -o /dev/null $server_host 2>&1)
+    fi
     if [ $? -eq 0 ]; then
         dem=$(echo "$result" | sed -n 's/real //p')
-        i=$(echo "10485760 / $dem" | bc)
+        i=$(echo "10278270 / $dem" | bc)
         d="" s=0 S=" KMGTPEYZ"
         while [ $i -gt 1024 ]; do
             d=$(printf ".%02d" $((i % 1024 * 100 / 1024)))
